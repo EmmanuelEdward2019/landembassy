@@ -1,37 +1,65 @@
-import { type User, type InsertUser } from "@shared/schema";
+import { type Quote, type InsertQuote, type Contact, type InsertContact } from "@shared/schema";
 import { randomUUID } from "crypto";
 
-// modify the interface with any CRUD methods
-// you might need
-
 export interface IStorage {
-  getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  createQuote(quote: InsertQuote): Promise<Quote>;
+  getAllQuotes(): Promise<Quote[]>;
+  deleteQuote(id: string): Promise<boolean>;
+  createContact(contact: InsertContact): Promise<Contact>;
+  getAllContacts(): Promise<Contact[]>;
+  deleteContact(id: string): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
-  private users: Map<string, User>;
+  private quotes: Map<string, Quote>;
+  private contacts: Map<string, Contact>;
 
   constructor() {
-    this.users = new Map();
+    this.quotes = new Map();
+    this.contacts = new Map();
   }
 
-  async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
+  async createQuote(insertQuote: InsertQuote): Promise<Quote> {
+    const id = randomUUID();
+    const quote: Quote = {
+      ...insertQuote,
+      id,
+      createdAt: new Date(),
+    };
+    this.quotes.set(id, quote);
+    return quote;
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
+  async getAllQuotes(): Promise<Quote[]> {
+    return Array.from(this.quotes.values()).sort(
+      (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
     );
   }
 
-  async createUser(insertUser: InsertUser): Promise<User> {
+  async deleteQuote(id: string): Promise<boolean> {
+    return this.quotes.delete(id);
+  }
+
+  async createContact(insertContact: InsertContact): Promise<Contact> {
     const id = randomUUID();
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
-    return user;
+    const contact: Contact = {
+      ...insertContact,
+      phone: insertContact.phone ?? null,
+      id,
+      createdAt: new Date(),
+    };
+    this.contacts.set(id, contact);
+    return contact;
+  }
+
+  async getAllContacts(): Promise<Contact[]> {
+    return Array.from(this.contacts.values()).sort(
+      (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+    );
+  }
+
+  async deleteContact(id: string): Promise<boolean> {
+    return this.contacts.delete(id);
   }
 }
 

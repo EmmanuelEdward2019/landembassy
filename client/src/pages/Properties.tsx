@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import PageHeader from "@/components/PageHeader";
 import PropertyCard from "@/components/PropertyCard";
 import { Input } from "@/components/ui/input";
@@ -20,7 +20,7 @@ export default function Properties() {
   const [priceRange, setPriceRange] = useState("all");
 
   // TODO: Remove mock data
-  const properties = [
+  const allProperties = [
     {
       id: "1",
       title: "Luxury 5 Bedroom Duplex",
@@ -89,6 +89,44 @@ export default function Properties() {
     },
   ];
 
+  const filteredProperties = useMemo(() => {
+    return allProperties.filter((property) => {
+      const matchesSearch =
+        searchQuery === "" ||
+        property.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        property.location.toLowerCase().includes(searchQuery.toLowerCase());
+
+      const matchesType =
+        propertyType === "all" ||
+        property.type.toLowerCase() === propertyType.toLowerCase();
+
+      const matchesLocation =
+        location === "all" ||
+        property.location.toLowerCase().includes(location.toLowerCase());
+
+      let matchesPrice = true;
+      if (priceRange !== "all") {
+        const price = parseInt(property.price.replace(/,/g, ""));
+        if (priceRange === "0-30m") {
+          matchesPrice = price < 30000000;
+        } else if (priceRange === "30-60m") {
+          matchesPrice = price >= 30000000 && price < 60000000;
+        } else if (priceRange === "60-100m") {
+          matchesPrice = price >= 60000000 && price < 100000000;
+        } else if (priceRange === "100m+") {
+          matchesPrice = price >= 100000000;
+        }
+      }
+
+      return matchesSearch && matchesType && matchesLocation && matchesPrice;
+    });
+  }, [searchQuery, propertyType, location, priceRange, allProperties]);
+
+  const handleSearch = () => {
+    // Search is already live, but this button can be used to reset focus
+    document.getElementById("search-input")?.focus();
+  };
+
   return (
     <div className="min-h-screen">
       <PageHeader
@@ -100,17 +138,22 @@ export default function Properties() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="bg-card rounded-lg p-6 mb-12 border">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-            <div className="lg:col-span-2">
-              <div className="relative">
+            <div className="lg:col-span-2 flex gap-2">
+              <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search properties..."
+                  id="search-input"
+                  placeholder="Search by title or location..."
                   className="pl-10"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   data-testid="input-search-properties"
                 />
               </div>
+              <Button onClick={handleSearch} variant="default" data-testid="button-search">
+                <Search className="h-4 w-4 md:mr-2" />
+                <span className="hidden md:inline">Search</span>
+              </Button>
             </div>
             <Select value={propertyType} onValueChange={setPropertyType}>
               <SelectTrigger data-testid="select-property-type">
@@ -152,15 +195,37 @@ export default function Properties() {
 
         <div className="flex justify-between items-center mb-6">
           <p className="text-muted-foreground">
-            Showing <span className="font-semibold text-foreground">{properties.length}</span> properties
+            Showing <span className="font-semibold text-foreground">{filteredProperties.length}</span> of{" "}
+            <span className="font-semibold text-foreground">{allProperties.length}</span> properties
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {properties.map((property) => (
-            <PropertyCard key={property.id} {...property} />
-          ))}
-        </div>
+        {filteredProperties.length === 0 ? (
+          <div className="text-center py-20">
+            <Search className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-2xl font-semibold mb-2">No properties found</h3>
+            <p className="text-muted-foreground mb-6">
+              Try adjusting your search criteria to find what you're looking for
+            </p>
+            <Button
+              onClick={() => {
+                setSearchQuery("");
+                setPropertyType("all");
+                setLocation("all");
+                setPriceRange("all");
+              }}
+              data-testid="button-clear-filters"
+            >
+              Clear Filters
+            </Button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {filteredProperties.map((property) => (
+              <PropertyCard key={property.id} {...property} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
