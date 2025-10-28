@@ -2,9 +2,10 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertQuoteSchema, insertContactSchema } from "@shared/schema";
+import { requireAdminToken } from "./middleware/auth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Quote submission endpoint
+  // Quote submission endpoint (public)
   app.post("/api/quotes", async (req, res) => {
     try {
       const quoteData = insertQuoteSchema.parse(req.body);
@@ -15,8 +16,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get all quotes (admin only)
-  app.get("/api/quotes", async (req, res) => {
+  // Get all quotes (admin only - protected)
+  app.get("/api/quotes", requireAdminToken, async (req, res) => {
     try {
       const quotes = await storage.getAllQuotes();
       res.json(quotes);
@@ -25,8 +26,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Delete quote (admin only)
-  app.delete("/api/quotes/:id", async (req, res) => {
+  // Delete quote (admin only - protected)
+  app.delete("/api/quotes/:id", requireAdminToken, async (req, res) => {
     try {
       const deleted = await storage.deleteQuote(req.params.id);
       if (deleted) {
@@ -39,7 +40,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Contact submission endpoint
+  // Contact submission endpoint (public)
   app.post("/api/contacts", async (req, res) => {
     try {
       const contactData = insertContactSchema.parse(req.body);
@@ -50,8 +51,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get all contacts (admin only)
-  app.get("/api/contacts", async (req, res) => {
+  // Get all contacts (admin only - protected)
+  app.get("/api/contacts", requireAdminToken, async (req, res) => {
     try {
       const contacts = await storage.getAllContacts();
       res.json(contacts);
@@ -60,8 +61,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Delete contact (admin only)
-  app.delete("/api/contacts/:id", async (req, res) => {
+  // Delete contact (admin only - protected)
+  app.delete("/api/contacts/:id", requireAdminToken, async (req, res) => {
     try {
       const deleted = await storage.deleteContact(req.params.id);
       if (deleted) {

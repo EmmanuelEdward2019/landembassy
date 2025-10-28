@@ -26,28 +26,58 @@ export default function Quote() {
     message: "",
   });
 
-  const handleSubmit = (method: "email" | "whatsapp") => {
-    console.log("Quote submitted via", method, formData);
-    
-    if (method === "whatsapp") {
-      const message = `Hello Land Embassy, I'm interested in getting a quote.\n\nName: ${formData.name}\nEmail: ${formData.email}\nPhone: ${formData.phone}\nProperty Interest: ${formData.propertyInterest}\nBudget Range: ${formData.budgetRange}\nMessage: ${formData.message}`;
-      const whatsappUrl = `https://wa.me/234XXXXXXXXXX?text=${encodeURIComponent(message)}`;
-      window.open(whatsappUrl, "_blank");
+  const handleSubmit = async (method: "email" | "whatsapp") => {
+    if (!formData.name || !formData.email || !formData.phone || !formData.propertyInterest || !formData.budgetRange || !formData.message) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields.",
+        variant: "destructive",
+      });
+      return;
     }
 
-    toast({
-      title: "Quote Request Sent!",
-      description: `Your quote request has been sent via ${method}. We'll get back to you shortly.`,
-    });
+    try {
+      const response = await fetch("/api/quotes", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...formData,
+          preferredContact: method,
+        }),
+      });
 
-    setFormData({
-      name: "",
-      email: "",
-      phone: "",
-      propertyInterest: "",
-      budgetRange: "",
-      message: "",
-    });
+      if (!response.ok) {
+        throw new Error("Failed to submit quote");
+      }
+
+      if (method === "whatsapp") {
+        const message = `Hello Land Embassy, I'm interested in getting a quote.\n\nName: ${formData.name}\nEmail: ${formData.email}\nPhone: ${formData.phone}\nProperty Interest: ${formData.propertyInterest}\nBudget Range: ${formData.budgetRange}\nMessage: ${formData.message}`;
+        const whatsappUrl = `https://wa.me/2349011072155?text=${encodeURIComponent(message)}`;
+        window.open(whatsappUrl, "_blank");
+      }
+
+      toast({
+        title: "Quote Request Sent!",
+        description: `Your quote request has been sent via ${method}. We'll get back to you shortly.`,
+      });
+
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        propertyInterest: "",
+        budgetRange: "",
+        message: "",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to submit quote request. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
