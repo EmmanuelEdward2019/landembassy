@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
-import { MapPin, Phone, Mail, MessageCircle } from "lucide-react";
+import { MapPin, Phone, Mail, MessageCircle, Clock, Globe } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import headerImage from "@assets/Customer Care_1761621717724.jpg";
 
@@ -13,7 +13,7 @@ export default function Contact() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    subject: "",
+    phone: "",
     message: "",
   });
 
@@ -24,7 +24,13 @@ export default function Contact() {
       title: "Message Sent!",
       description: "We've received your message and will get back to you soon.",
     });
-    setFormData({ name: "", email: "", subject: "", message: "" });
+    setFormData({ name: "", email: "", phone: "", message: "" });
+  };
+
+  const handleWhatsApp = () => {
+    const message = `Hello Land Embassy, I would like to get in touch.\n\nName: ${formData.name}\nEmail: ${formData.email}\nPhone: ${formData.phone}\nMessage: ${formData.message}`;
+    const whatsappUrl = `https://wa.me/2349011072155?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, "_blank");
   };
 
   return (
@@ -43,9 +49,9 @@ export default function Contact() {
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium mb-2">Your Name *</label>
+                    <label className="block text-sm font-medium mb-2">Full Name *</label>
                     <Input
-                      placeholder="John Doe"
+                      placeholder="Your Name"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       required
@@ -56,7 +62,7 @@ export default function Contact() {
                     <label className="block text-sm font-medium mb-2">Email Address *</label>
                     <Input
                       type="email"
-                      placeholder="john@example.com"
+                      placeholder="your.email@example.com"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       required
@@ -66,20 +72,20 @@ export default function Contact() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">Subject *</label>
+                  <label className="block text-sm font-medium mb-2">Phone Number</label>
                   <Input
-                    placeholder="How can we help you?"
-                    value={formData.subject}
-                    onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                    required
-                    data-testid="input-contact-subject"
+                    type="tel"
+                    placeholder="+234 XXX XXX XXXX"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    data-testid="input-contact-phone"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium mb-2">Message *</label>
                   <Textarea
-                    placeholder="Tell us more about your inquiry..."
+                    placeholder="How can we help you?"
                     rows={6}
                     value={formData.message}
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
@@ -88,9 +94,22 @@ export default function Contact() {
                   />
                 </div>
 
-                <Button type="submit" className="w-full" data-testid="button-send-message">
-                  Send Message
-                </Button>
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Button type="submit" className="flex-1" data-testid="button-send-message">
+                    <Mail className="mr-2 h-4 w-4" />
+                    Send Message
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="flex-1"
+                    onClick={handleWhatsApp}
+                    data-testid="button-whatsapp-contact"
+                  >
+                    <MessageCircle className="mr-2 h-4 w-4" />
+                    WhatsApp Us
+                  </Button>
+                </div>
               </form>
             </Card>
           </div>
@@ -100,32 +119,30 @@ export default function Contact() {
               <MapPin className="h-8 w-8 text-primary mb-4" />
               <h3 className="font-semibold mb-2">Visit Our Office</h3>
               <p className="text-sm text-muted-foreground">
-                123 Real Estate Avenue<br />
-                Victoria Island<br />
-                Lagos, Nigeria
+                27 Ekpeyong Street<br />
+                Uyo, Akwa Ibom State<br />
+                Nigeria
               </p>
             </Card>
 
             <Card className="p-6">
               <Phone className="h-8 w-8 text-primary mb-4" />
               <h3 className="font-semibold mb-2">Call Us</h3>
-              <p className="text-sm text-muted-foreground mb-1">
-                +234 XXX XXX XXXX
-              </p>
-              <p className="text-sm text-muted-foreground">
-                Mon - Fri: 9:00 AM - 6:00 PM
-              </p>
+              <a href="tel:+2349011072155" className="text-sm text-muted-foreground hover:text-primary transition-colors block mb-1">
+                +234 901 107 2155
+              </a>
+              <div className="flex items-center gap-2 mt-3 text-xs text-muted-foreground">
+                <Clock className="h-3 w-3" />
+                <span>Mon - Sat: 9:00 AM - 6:00 PM</span>
+              </div>
             </Card>
 
             <Card className="p-6">
               <Mail className="h-8 w-8 text-primary mb-4" />
               <h3 className="font-semibold mb-2">Email Us</h3>
-              <p className="text-sm text-muted-foreground mb-1">
+              <a href="mailto:info@landembassy.com" className="text-sm text-muted-foreground hover:text-primary transition-colors block">
                 info@landembassy.com
-              </p>
-              <p className="text-sm text-muted-foreground">
-                support@landembassy.com
-              </p>
+              </a>
             </Card>
 
             <Card className="p-6">
@@ -134,10 +151,23 @@ export default function Contact() {
               <p className="text-sm text-muted-foreground mb-3">
                 Chat with us on WhatsApp for quick responses
               </p>
-              <Button variant="outline" className="w-full" data-testid="button-whatsapp">
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => window.open("https://wa.me/2349011072155", "_blank")}
+                data-testid="button-whatsapp"
+              >
                 <MessageCircle className="mr-2 h-4 w-4" />
                 Start Chat
               </Button>
+            </Card>
+
+            <Card className="p-6">
+              <Globe className="h-8 w-8 text-primary mb-4" />
+              <h3 className="font-semibold mb-2">Follow Us</h3>
+              <p className="text-sm text-muted-foreground">
+                Stay connected on social media for updates and news
+              </p>
             </Card>
           </div>
         </div>
@@ -146,7 +176,7 @@ export default function Contact() {
           <Card className="overflow-hidden">
             <div className="aspect-[21/9] bg-muted">
               <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3964.7398405025693!2d3.4204154!3d6.4281183!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x103b8b2ae68280c1%3A0xdc9e87a367c3d9cb!2sLagos!5e0!3m2!1sen!2sng!4v1234567890"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3975.8363!2d7.9334!3d5.0447!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNcKwMDInNDEuMyJOIDfCsDU2JzAwLjIiRQ!5e0!3m2!1sen!2sng!4v1234567890"
                 width="100%"
                 height="100%"
                 style={{ border: 0 }}

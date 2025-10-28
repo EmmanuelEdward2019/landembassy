@@ -12,19 +12,43 @@ export default function Footer() {
           <div>
             <img src={logoImage} alt="Land Embassy" className="h-12 w-auto mb-4" />
             <p className="text-sm text-muted-foreground mb-4">
-              Your trusted partner in finding premium real estate across Nigeria. Building dreams, creating homes.
+              Building Wealth, One Investment at a Time. Creating real estate solutions of tomorrow.
             </p>
             <div className="flex gap-3">
-              <a href="#" className="hover-elevate p-2 rounded-md" data-testid="link-facebook">
+              <a
+                href="https://www.facebook.com/profile.php?id=61566008745364&mibextid=LQQJ4d"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover-elevate p-2 rounded-md"
+                data-testid="link-facebook"
+              >
                 <Facebook className="h-5 w-5" />
               </a>
-              <a href="#" className="hover-elevate p-2 rounded-md" data-testid="link-instagram">
+              <a
+                href="https://www.instagram.com/landembassy?igsh=MTFrdXAzN21qcGpnaw%3D%3D&utm_source=qr"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover-elevate p-2 rounded-md"
+                data-testid="link-instagram"
+              >
                 <Instagram className="h-5 w-5" />
               </a>
-              <a href="#" className="hover-elevate p-2 rounded-md" data-testid="link-twitter">
+              <a
+                href="http://x.com/landembassy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover-elevate p-2 rounded-md"
+                data-testid="link-twitter"
+              >
                 <Twitter className="h-5 w-5" />
               </a>
-              <a href="#" className="hover-elevate p-2 rounded-md" data-testid="link-linkedin">
+              <a
+                href="https://www.linkedin.com/company/landembassy/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover-elevate p-2 rounded-md"
+                data-testid="link-linkedin"
+              >
                 <Linkedin className="h-5 w-5" />
               </a>
             </div>
@@ -35,18 +59,20 @@ export default function Footer() {
             <ul className="space-y-2 text-sm">
               <li><Link href="/about" className="text-muted-foreground hover:text-primary transition-colors">About Us</Link></li>
               <li><Link href="/properties" className="text-muted-foreground hover:text-primary transition-colors">Properties</Link></li>
+              <li><Link href="/services" className="text-muted-foreground hover:text-primary transition-colors">Services</Link></li>
               <li><Link href="/gallery" className="text-muted-foreground hover:text-primary transition-colors">Gallery</Link></li>
               <li><Link href="/blog" className="text-muted-foreground hover:text-primary transition-colors">Blog</Link></li>
             </ul>
           </div>
 
           <div>
-            <h3 className="font-semibold mb-4">Properties</h3>
+            <h3 className="font-semibold mb-4">Our Services</h3>
             <ul className="space-y-2 text-sm">
-              <li><Link href="/properties?type=residential" className="text-muted-foreground hover:text-primary transition-colors">Residential</Link></li>
-              <li><Link href="/properties?type=commercial" className="text-muted-foreground hover:text-primary transition-colors">Commercial</Link></li>
-              <li><Link href="/properties?type=land" className="text-muted-foreground hover:text-primary transition-colors">Land</Link></li>
-              <li><Link href="/properties?type=luxury" className="text-muted-foreground hover:text-primary transition-colors">Luxury Homes</Link></li>
+              <li><span className="text-muted-foreground">Property Development</span></li>
+              <li><span className="text-muted-foreground">Real Estate Brokerage</span></li>
+              <li><span className="text-muted-foreground">Architectural Services</span></li>
+              <li><span className="text-muted-foreground">Interior Decoration</span></li>
+              <li><span className="text-muted-foreground">Consultancy Services</span></li>
             </ul>
           </div>
 
@@ -55,15 +81,19 @@ export default function Footer() {
             <ul className="space-y-3 text-sm">
               <li className="flex items-start gap-2">
                 <MapPin className="h-4 w-4 mt-1 text-primary flex-shrink-0" />
-                <span className="text-muted-foreground">Lagos, Nigeria</span>
+                <span className="text-muted-foreground">27 Ekpeyong Street, Uyo, Nigeria</span>
               </li>
               <li className="flex items-center gap-2">
                 <Phone className="h-4 w-4 text-primary flex-shrink-0" />
-                <span className="text-muted-foreground">+234 XXX XXX XXXX</span>
+                <a href="tel:+2349011072155" className="text-muted-foreground hover:text-primary transition-colors">
+                  +234 901 107 2155
+                </a>
               </li>
               <li className="flex items-center gap-2">
                 <Mail className="h-4 w-4 text-primary flex-shrink-0" />
-                <span className="text-muted-foreground">info@landembassy.com</span>
+                <a href="mailto:info@landembassy.com" className="text-muted-foreground hover:text-primary transition-colors">
+                  info@landembassy.com
+                </a>
               </li>
             </ul>
           </div>

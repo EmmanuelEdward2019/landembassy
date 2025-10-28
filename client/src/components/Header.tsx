@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Phone, Mail } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import logoImage from "@assets/logo resized_1761621717727.png";
 
 export default function Header() {
@@ -12,6 +12,7 @@ export default function Header() {
     { path: "/", label: "Home" },
     { path: "/about", label: "About Us" },
     { path: "/properties", label: "Properties" },
+    { path: "/services", label: "Services" },
     { path: "/gallery", label: "Gallery" },
     { path: "/blog", label: "Blog" },
     { path: "/contact", label: "Contact" },
@@ -62,7 +63,7 @@ export default function Header() {
       </div>
 
       {mobileMenuOpen && (
-        <div className="md:hidden border-t bg-background">
+        <div className="md:hidden border-t bg-background animate-in slide-in-from-top-4 duration-300">
           <nav className="flex flex-col p-4 gap-2">
             {navItems.map((item) => (
               <Link

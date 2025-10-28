@@ -7,7 +7,9 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Home from "@/pages/Home";
 import Properties from "@/pages/Properties";
+import PropertyDetail from "@/pages/PropertyDetail";
 import About from "@/pages/About";
+import Services from "@/pages/Services";
 import Quote from "@/pages/Quote";
 import Gallery from "@/pages/Gallery";
 import Blog from "@/pages/Blog";
@@ -19,7 +21,9 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/properties" component={Properties} />
+      <Route path="/properties/:id" component={PropertyDetail} />
       <Route path="/about" component={About} />
+      <Route path="/services" component={Services} />
       <Route path="/quote" component={Quote} />
       <Route path="/gallery" component={Gallery} />
       <Route path="/blog" component={Blog} />
