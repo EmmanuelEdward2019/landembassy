@@ -1,6 +1,27 @@
-node_modules
-dist
+# Dependencies
+node_modules/
+
+# Production builds
+dist/
+build/
+
+# Logs
+*.log
+
+# Environment files
+.env*
+
+# IDE files
+.vscode/
+.idea/
+
+# OS generated files
 .DS_Store
-server/public
-vite.config.ts.*
-*.tar.gz
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+
+# Uploads directory
+client/public/uploads/
