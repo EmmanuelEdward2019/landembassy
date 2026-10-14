@@ -14,7 +14,16 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [20.x, 22.x]
+        node-version: [22.x, 24.x]
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: [ "5432:5432" ]
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
 
     steps:
     - uses: actions/checkout@v4
@@ -31,8 +40,18 @@ jobs:
     - name: Type check
       run: npm run check
 
-    - name: Run tests
+    - name: Run tests (in-memory storage)
       run: npm test
+
+    - name: Apply database migrations
+      run: npm run db:migrate
+      env:
+        DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
+
+    - name: Run tests (Postgres)
+      run: npm test
+      env:
+        TEST_DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
 
     - name: Run build
       run: npm run build

@@ -1,21 +1,33 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, decimal, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, numeric, boolean, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import {
+  LISTING_TYPES,
+  PROPERTY_STATUSES,
+  PROPERTY_TYPES,
+  PRICE_PERIODS,
+  INQUIRY_STATUSES,
+} from "./property.js";
 
-export const properties = pgTable("properties", {
+export const propertyListings = pgTable("property_listings", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   title: text("title").notNull(),
-  description: text("description").notNull(),
-  price: decimal("price", { precision: 12, scale: 2 }).notNull(),
-  location: text("location").notNull(),
-  propertyType: text("property_type").notNull(),
-  bedrooms: integer("bedrooms").notNull(),
-  bathrooms: integer("bathrooms").notNull(),
-  area: integer("area").notNull(),
-  images: text("images").array().notNull(),
-  featured: integer("featured").default(0),
+  description: text("description").notNull().default(""),
+  listingType: text("listing_type").notNull().default("sale"),
   status: text("status").notNull().default("available"),
+  propertyType: text("property_type").notNull(),
+  price: numeric("price", { precision: 15, scale: 2, mode: "number" }).notNull(),
+  pricePeriod: text("price_period"),
+  location: text("location").notNull(),
+  bedrooms: integer("bedrooms").notNull().default(0),
+  bathrooms: integer("bathrooms").notNull().default(0),
+  area: integer("area").notNull().default(0),
+  images: text("images").array().notNull().default(sql`'{}'::text[]`),
+  features: text("features").array().notNull().default(sql`'{}'::text[]`),
+  featured: boolean("featured").notNull().default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export const quotes = pgTable("quotes", {
@@ -27,6 +39,7 @@ export const quotes = pgTable("quotes", {
   budgetRange: text("budget_range").notNull(),
   message: text("message").notNull(),
   preferredContact: text("preferred_contact").notNull(),
+  status: text("status").notNull().default("new"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -36,22 +49,8 @@ export const contacts = pgTable("contacts", {
   email: text("email").notNull(),
   phone: text("phone"),
   message: text("message").notNull(),
+  status: text("status").notNull().default("new"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
-
-export const blogPosts = pgTable("blog_posts", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  title: text("title").notNull(),
-  excerpt: text("excerpt").notNull(),
-  content: text("content").notNull(),
-  category: text("category").notNull(),
-  image: text("image").notNull(),
-  author: text("author").notNull(),
-  publishedAt: text("published_at").notNull(),
-});
-
-export const insertPropertySchema = createInsertSchema(properties).omit({
-  id: true,
 });
 
 // Public form input: bounded lengths so anonymous submissions can't bloat storage.
@@ -64,6 +63,7 @@ export const insertQuoteSchema = createInsertSchema(quotes)
   .omit({
     id: true,
     createdAt: true,
+    status: true,
   })
   .extend({
     name,
@@ -79,6 +79,7 @@ export const insertContactSchema = createInsertSchema(contacts)
   .omit({
     id: true,
     createdAt: true,
+    status: true,
   })
   .extend({
     name,
@@ -87,15 +88,51 @@ export const insertContactSchema = createInsertSchema(contacts)
     message,
   });
 
-export const insertBlogPostSchema = createInsertSchema(blogPosts).omit({
-  id: true,
-});
+export const inquiryStatusSchema = z.object({ status: z.enum(INQUIRY_STATUSES) });
 
-export type Property = typeof properties.$inferSelect;
-export type InsertProperty = z.infer<typeof insertPropertySchema>;
+const imageUrl = z
+  .string()
+  .trim()
+  .max(2048)
+  .refine((value) => /^https:\/\//.test(value) || value.startsWith("/"), "Images must be https:// URLs");
+
+// Admin property input. Rent/lease/shortlet prices carry a period; sale prices don't.
+export const propertyInputSchema = z
+  .object({
+    title: z.string().trim().min(3).max(160),
+    description: z.string().trim().max(10_000).default(""),
+    listingType: z.enum(LISTING_TYPES),
+    status: z.enum(PROPERTY_STATUSES),
+    propertyType: z.enum(PROPERTY_TYPES),
+    price: z.coerce.number().nonnegative().max(1e13),
+    pricePeriod: z.enum(PRICE_PERIODS).nullish(),
+    location: z.string().trim().min(2).max(200),
+    bedrooms: z.coerce.number().int().min(0).max(100).default(0),
+    bathrooms: z.coerce.number().int().min(0).max(100).default(0),
+    area: z.coerce.number().int().min(0).max(100_000_000).default(0),
+    images: z.array(imageUrl).max(30).default([]),
+    features: z.array(z.string().trim().min(1).max(80)).max(50).default([]),
+    featured: z.boolean().default(false),
+  })
+  .transform((input) => ({
+    ...input,
+    pricePeriod: input.listingType === "sale" ? null : (input.pricePeriod ?? "year"),
+  }));
+
+// Quick edits from the properties table (status dropdown, featured star)
+export const propertyPatchSchema = z
+  .object({
+    status: z.enum(PROPERTY_STATUSES),
+    featured: z.boolean(),
+  })
+  .partial()
+  .refine((patch) => Object.keys(patch).length > 0, "Nothing to update");
+
+export type Property = typeof propertyListings.$inferSelect;
+export type PropertyInput = z.infer<typeof propertyInputSchema>;
+export type PropertyPatch = z.infer<typeof propertyPatchSchema>;
 export type Quote = typeof quotes.$inferSelect;
 export type InsertQuote = z.infer<typeof insertQuoteSchema>;
 export type Contact = typeof contacts.$inferSelect;
 export type InsertContact = z.infer<typeof insertContactSchema>;
-export type BlogPost = typeof blogPosts.$inferSelect;
-export type InsertBlogPost = z.infer<typeof insertBlogPostSchema>;
+export type InquiryStatus = z.infer<typeof inquiryStatusSchema>["status"];

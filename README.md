@@ -1,6 +1,6 @@
 # Land Embassy Limited — Website
 
-Corporate website for Land Embassy Limited, a real estate investment, architecture, development and management company in Nigeria. Visitors can browse properties, services and blog posts, and send quote requests or contact messages, which the team manages from an admin dashboard and receives by email.
+Corporate website for Land Embassy Limited, a real estate investment, architecture, development and management company in Nigeria. Visitors browse property listings (for sale, rent, lease and shortlet), services and blog posts, and send quote requests or contact messages. The team manages listings and inquiries from an admin dashboard and receives inquiries by email.
 
 ## Stack
 
@@ -8,6 +8,7 @@ Corporate website for Land Embassy Limited, a real estate investment, architectu
 - **Server:** Express (`server/`), served as a Vercel serverless function in production (`api/index.ts`)
 - **Database:** PostgreSQL (Neon) via Drizzle ORM (`shared/schema.ts`)
 - **Email:** nodemailer over SMTP (Gmail by default)
+- **Images:** Vercel Blob (admin uploads)
 
 ## Getting started
 
@@ -26,7 +27,8 @@ Without `DATABASE_URL`, submissions are kept in memory (fine for local developme
 | `npm test` | API and notification tests |
 | `npm run build` | Production build (client to `dist/public`, server to `dist/index.js`) |
 | `npm start` | Run the production build with Node |
-| `npm run db:push` | Create/update database tables from `shared/schema.ts` |
+| `npm run db:migrate` | Apply pending database migrations (also runs on every Vercel deploy) |
+| `npm run db:generate` | Create a new migration after changing `shared/schema.ts` |
 
 ## Environment variables
 
@@ -40,20 +42,28 @@ See [.env.example](.env.example).
 | `SMTP_USER` / `SMTP_PASS` | For email | SMTP login. For Gmail use the address and an [App Password](https://myaccount.google.com/apppasswords). |
 | `SMTP_HOST` / `SMTP_PORT` | No | Defaults to `smtp.gmail.com` / `465`. |
 | `MAIL_FROM` | No | Sender address. Defaults to `SMTP_USER`. |
+| `BLOB_READ_WRITE_TOKEN` | For uploads | Set automatically when a Vercel Blob store is connected. Without it, images are added by link. |
 
 ## Admin
 
-- Dashboard: `/embassy-admin`, log in with `ADMIN_TOKEN`.
-- Every new quote request and contact message is emailed to `ADMIN_EMAIL`. Reply to the email to answer the customer directly.
+Dashboard at `/embassy-admin`, log in with `ADMIN_TOKEN`.
+
+- **Overview:** listing and inquiry totals, listings by status and type, recent inquiries and recently updated listings.
+- **Properties:** search and filter all listings; change status (Available, Under Offer, Sold, Rented, Leased, Off Market) and featured flag inline; add, edit and delete listings. Off Market listings are hidden from the website. Featured listings appear on the home page.
+- **Property editor:** listing type (Sale, Rent, Lease, Shortlet), price and price period, property type, bedrooms, bathrooms, area, images (upload or link; first image is the cover) and features.
+- **Quote Requests / Messages:** filter by status (New, Contacted, Closed), read full messages, reply by email or WhatsApp, delete.
+
+Every new quote request and contact message is also emailed to `ADMIN_EMAIL`. Reply to the email to answer the customer directly.
 
 ## Deployment
 
-The site deploys to Vercel from GitHub: pull requests get preview deployments and merges to `main` go to production. `vercel.json` defines the build, the SPA and API rewrites, and security headers. Set the environment variables above in the Vercel project settings, and run `npm run db:push` once against the production database.
+The site deploys to Vercel from GitHub: pull requests get preview deployments and merges to `main` go to production. `vercel.json` defines the build, the SPA and API rewrites, and security headers. Set the environment variables above in the Vercel project settings. Each deploy runs `npm run db:migrate` before building, so database tables are created and updated automatically; a failed migration fails the deploy and leaves the live site unchanged.
 
 ## Project layout
 
 ```
 api/            Vercel serverless entry (wraps the Express app)
+migrations/     SQL migrations (schema + the initial property listings)
 client/         React app (pages, components, assets, public files)
 server/         Express app, routes, storage, auth, email notifications
 shared/         Database schema and validation shared by client and server

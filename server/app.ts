@@ -19,8 +19,8 @@ export function createApp() {
       contentSecurityPolicy: false,
     }),
   );
-  app.use(express.json({ limit: "20kb" }));
-  app.use(express.urlencoded({ extended: false, limit: "20kb" }));
+  app.use(express.json({ limit: "64kb" }));
+  app.use(express.urlencoded({ extended: false, limit: "64kb" }));
 
   app.use((req, res, next) => {
     const start = Date.now();

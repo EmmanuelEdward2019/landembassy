@@ -5,7 +5,14 @@ import type { Server } from "http";
 
 const ADMIN_TOKEN = "test-admin-token-0123456789abcdef";
 process.env.ADMIN_TOKEN = ADMIN_TOKEN;
-delete process.env.DATABASE_URL;
+// In-memory storage by default; set TEST_DATABASE_URL (a freshly migrated
+// database) to run the same tests against Postgres.
+if (process.env.TEST_DATABASE_URL) {
+  process.env.DATABASE_URL = process.env.TEST_DATABASE_URL;
+} else {
+  delete process.env.DATABASE_URL;
+}
+delete process.env.BLOB_READ_WRITE_TOKEN;
 
 const { createApp } = await import("./app.js");
 
@@ -109,6 +116,116 @@ test("unknown API routes return JSON 404", async () => {
   const res = await fetch(`${baseUrl}/api/nope`);
   assert.equal(res.status, 404);
   assert.equal(res.headers.get("x-powered-by"), null);
+});
+
+const validProperty = {
+  title: "3 Bedroom Flat",
+  description: "Serviced flat",
+  listingType: "rent",
+  status: "available",
+  propertyType: "residential",
+  price: 4500000,
+  location: "Yaba, Lagos",
+  bedrooms: 3,
+  bathrooms: 3,
+  area: 140,
+  images: ["https://images.unsplash.com/photo-1?w=1200"],
+  features: ["Parking"],
+  featured: false,
+};
+
+function adminSend(method: string, path: string, body: unknown) {
+  return fetch(baseUrl + path, {
+    method,
+    headers: { ...auth, "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+}
+
+test("seeded properties are public, with original ids", async () => {
+  const res = await fetch(`${baseUrl}/api/properties`);
+  assert.equal(res.status, 200);
+  const properties = await res.json();
+  assert.equal(properties.length, 6);
+  assert.ok(properties[0].featured, "featured listings come first");
+  const duplex = await (await fetch(`${baseUrl}/api/properties/1`)).json();
+  assert.equal(duplex.title, "Luxury 5 Bedroom Duplex");
+  assert.equal(duplex.price, 85000000);
+});
+
+test("property admin endpoints require the token", async () => {
+  assert.equal((await fetch(`${baseUrl}/api/admin/properties`)).status, 401);
+  const res = await fetch(`${baseUrl}/api/admin/properties`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(validProperty),
+  });
+  assert.equal(res.status, 401);
+});
+
+test("property can be created, edited, status-changed and deleted", async () => {
+  const created = await adminSend("POST", "/api/admin/properties", validProperty);
+  assert.equal(created.status, 201);
+  const property = await created.json();
+  assert.equal(property.pricePeriod, "year", "rentals default to a yearly price");
+
+  const edited = await adminSend("PUT", `/api/admin/properties/${property.id}`, {
+    ...validProperty,
+    listingType: "sale",
+    pricePeriod: "month",
+    price: 60000000,
+  });
+  assert.equal(edited.status, 200);
+  const sale = await edited.json();
+  assert.equal(sale.pricePeriod, null, "sale prices have no period");
+  assert.equal(sale.price, 60000000);
+
+  const patched = await adminSend("PATCH", `/api/admin/properties/${property.id}`, { status: "sold", featured: true });
+  assert.equal((await patched.json()).status, "sold");
+
+  const del = await fetch(`${baseUrl}/api/admin/properties/${property.id}`, { method: "DELETE", headers: auth });
+  assert.equal(del.status, 204);
+  assert.equal((await fetch(`${baseUrl}/api/properties/${property.id}`)).status, 404);
+});
+
+test("off-market properties are hidden from the public site but not the admin", async () => {
+  const property = await (await adminSend("POST", "/api/admin/properties", { ...validProperty, status: "off_market" })).json();
+  assert.equal((await fetch(`${baseUrl}/api/properties/${property.id}`)).status, 404);
+  const publicList = await (await fetch(`${baseUrl}/api/properties`)).json();
+  assert.ok(!publicList.some((p: { id: string }) => p.id === property.id));
+  const adminList = await (await fetch(`${baseUrl}/api/admin/properties`, { headers: auth })).json();
+  assert.ok(adminList.some((p: { id: string }) => p.id === property.id));
+});
+
+test("invalid property data is rejected", async () => {
+  assert.equal((await adminSend("POST", "/api/admin/properties", { ...validProperty, listingType: "swap" })).status, 400);
+  assert.equal((await adminSend("POST", "/api/admin/properties", { ...validProperty, price: -1 })).status, 400);
+  assert.equal(
+    (await adminSend("POST", "/api/admin/properties", { ...validProperty, images: ["javascript:alert(1)"] })).status,
+    400,
+  );
+  assert.equal((await adminSend("PATCH", "/api/admin/properties/1", { title: "Nope" })).status, 400);
+});
+
+test("inquiry status can be updated", async () => {
+  await post("/api/contacts", { name: "Status", email: "status@example.com", message: "Hi" });
+  const contacts = await (await fetch(`${baseUrl}/api/contacts`, { headers: auth })).json();
+  const contact = contacts.find((c: { email: string }) => c.email === "status@example.com");
+  assert.equal(contact.status, "new");
+  const res = await adminSend("PATCH", `/api/contacts/${contact.id}`, { status: "contacted" });
+  assert.equal((await res.json()).status, "contacted");
+  assert.equal((await adminSend("PATCH", `/api/contacts/${contact.id}`, { status: "spam" })).status, 400);
+});
+
+test("image upload reports when Vercel Blob isn't configured", async () => {
+  const res = await fetch(`${baseUrl}/api/admin/uploads`, {
+    method: "POST",
+    headers: { ...auth, "Content-Type": "image/jpeg" },
+    body: new Uint8Array([0xff, 0xd8, 0xff]),
+  });
+  assert.equal(res.status, 503);
+  const session = await (await fetch(`${baseUrl}/api/admin/session`, { headers: auth })).json();
+  assert.equal(session.uploads, false);
 });
 
 // Keep last: it exhausts the shared submission rate limit

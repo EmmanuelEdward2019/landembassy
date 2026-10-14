@@ -17,47 +17,16 @@ import {
   Heart,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { useQuery } from "@tanstack/react-query";
+import type { Property } from "@shared/schema";
 import heroImage from "@assets/hero.jpg";
 import welcomeImage from "@assets/welcome.jpg";
 import customerCareImage from "@assets/customer-care.jpg";
 
 export default function Home() {
-  // TODO: Remove mock data
-  const featuredProperties = [
-    {
-      id: "1",
-      title: "Luxury 5 Bedroom Duplex",
-      price: "85,000,000",
-      location: "Banana Island, Lagos",
-      bedrooms: 5,
-      bathrooms: 6,
-      area: 450,
-      image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800",
-      type: "Luxury",
-    },
-    {
-      id: "2",
-      title: "Modern 3 Bedroom Apartment",
-      price: "32,000,000",
-      location: "Victoria Island, Lagos",
-      bedrooms: 3,
-      bathrooms: 4,
-      area: 220,
-      image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800",
-      type: "Residential",
-    },
-    {
-      id: "3",
-      title: "Commercial Plaza",
-      price: "250,000,000",
-      location: "Abuja",
-      bedrooms: 0,
-      bathrooms: 8,
-      area: 1200,
-      image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800",
-      type: "Commercial",
-    },
-  ];
+  const { data: properties = [] } = useQuery<Property[]>({ queryKey: ["/api/properties"] });
+  // Featured listings first (the API sorts them to the top); fall back to the newest
+  const featuredProperties = properties.slice(0, 3);
 
   const blogPosts = [
     {
@@ -278,7 +247,7 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {featuredProperties.map((property) => (
-              <PropertyCard key={property.id} {...property} />
+              <PropertyCard key={property.id} property={property} />
             ))}
           </div>
         </div>

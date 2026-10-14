@@ -16,7 +16,7 @@ import Gallery from "@/pages/Gallery";
 import Blog from "@/pages/Blog";
 import BlogPost from "@/pages/BlogPost";
 import Contact from "@/pages/Contact";
-import EmbassyAdmin from "@/pages/EmbassyAdmin";
+import AdminApp from "@/pages/admin/AdminApp";
 import NotFound from "@/pages/not-found";
 
 function ScrollToTop() {
@@ -42,7 +42,6 @@ function Router() {
       <Route path="/blog" component={Blog} />
       <Route path="/blog/:id" component={BlogPost} />
       <Route path="/contact" component={Contact} />
-      <Route path="/embassy-admin" component={EmbassyAdmin} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -53,13 +52,21 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <ScrollToTop />
-        <div className="flex flex-col min-h-screen">
-          <Header />
-          <main className="flex-1">
-            <Router />
-          </main>
-          <Footer />
-        </div>
+        <Switch>
+          {/* The admin dashboard has its own layout, without the public header and footer */}
+          <Route path="/embassy-admin" nest>
+            <AdminApp />
+          </Route>
+          <Route>
+            <div className="flex flex-col min-h-screen">
+              <Header />
+              <main className="flex-1">
+                <Router />
+              </main>
+              <Footer />
+            </div>
+          </Route>
+        </Switch>
         <Toaster />
       </TooltipProvider>
     </QueryClientProvider>

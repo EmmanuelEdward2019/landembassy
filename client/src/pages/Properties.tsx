@@ -11,102 +11,56 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Search } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { Skeleton } from "@/components/ui/skeleton";
+import type { Property } from "@shared/schema";
+import {
+  LISTING_TYPES,
+  LISTING_TYPE_LABELS,
+  PROPERTY_TYPES,
+  PROPERTY_TYPE_LABELS,
+} from "@shared/property";
+
 import headerImage from "@assets/page-header.jpg";
 
+const LOCATION_KEYWORDS: Record<string, string[]> = {
+  lagos: ["lagos"],
+  abuja: ["abuja"],
+  ph: ["port harcourt", "rivers"],
+};
+
 export default function Properties() {
+  const initialListing = new URLSearchParams(window.location.search).get("type");
   const [searchQuery, setSearchQuery] = useState("");
   const [propertyType, setPropertyType] = useState("all");
+  const [listingType, setListingType] = useState(
+    initialListing && (LISTING_TYPES as readonly string[]).includes(initialListing) ? initialListing : "all",
+  );
   const [location, setLocation] = useState("all");
   const [priceRange, setPriceRange] = useState("all");
 
-  // TODO: Remove mock data
-  const allProperties = [
-    {
-      id: "1",
-      title: "Luxury 5 Bedroom Duplex",
-      price: "85,000,000",
-      location: "Banana Island, Lagos",
-      bedrooms: 5,
-      bathrooms: 6,
-      area: 450,
-      image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800",
-      type: "Luxury",
-    },
-    {
-      id: "2",
-      title: "Modern 3 Bedroom Apartment",
-      price: "32,000,000",
-      location: "Victoria Island, Lagos",
-      bedrooms: 3,
-      bathrooms: 4,
-      area: 220,
-      image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800",
-      type: "Residential",
-    },
-    {
-      id: "3",
-      title: "Commercial Plaza",
-      price: "250,000,000",
-      location: "Central Business District, Abuja",
-      bedrooms: 0,
-      bathrooms: 8,
-      area: 1200,
-      image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800",
-      type: "Commercial",
-    },
-    {
-      id: "4",
-      title: "4 Bedroom Terrace",
-      price: "55,000,000",
-      location: "Lekki Phase 1, Lagos",
-      bedrooms: 4,
-      bathrooms: 5,
-      area: 320,
-      image: "https://images.unsplash.com/photo-1599809275671-b5942cabc7a2?w=800",
-      type: "Residential",
-    },
-    {
-      id: "5",
-      title: "Prime Land",
-      price: "120,000,000",
-      location: "Ikoyi, Lagos",
-      bedrooms: 0,
-      bathrooms: 0,
-      area: 2500,
-      image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800",
-      type: "Land",
-    },
-    {
-      id: "6",
-      title: "Executive 6 Bedroom Mansion",
-      price: "180,000,000",
-      location: "Asokoro, Abuja",
-      bedrooms: 6,
-      bathrooms: 7,
-      area: 650,
-      image: "https://images.unsplash.com/photo-1613977257363-707ba9348227?w=800",
-      type: "Luxury",
-    },
-  ];
+  const { data: allProperties = [], isLoading, error, refetch } = useQuery<Property[]>({
+    queryKey: ["/api/properties"],
+  });
 
   const filteredProperties = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
     return allProperties.filter((property) => {
       const matchesSearch =
-        searchQuery === "" ||
-        property.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        property.location.toLowerCase().includes(searchQuery.toLowerCase());
+        query === "" ||
+        property.title.toLowerCase().includes(query) ||
+        property.location.toLowerCase().includes(query);
 
-      const matchesType =
-        propertyType === "all" ||
-        property.type.toLowerCase() === propertyType.toLowerCase();
+      const matchesType = propertyType === "all" || property.propertyType === propertyType;
+      const matchesListing = listingType === "all" || property.listingType === listingType;
 
       const matchesLocation =
         location === "all" ||
-        property.location.toLowerCase().includes(location.toLowerCase());
+        LOCATION_KEYWORDS[location].some((keyword) => property.location.toLowerCase().includes(keyword));
 
       let matchesPrice = true;
       if (priceRange !== "all") {
-        const price = parseInt(property.price.replace(/,/g, ""));
+        const price = property.price;
         if (priceRange === "0-30m") {
           matchesPrice = price < 30000000;
         } else if (priceRange === "30-60m") {
@@ -118,9 +72,9 @@ export default function Properties() {
         }
       }
 
-      return matchesSearch && matchesType && matchesLocation && matchesPrice;
+      return matchesSearch && matchesType && matchesListing && matchesLocation && matchesPrice;
     });
-  }, [searchQuery, propertyType, location, priceRange, allProperties]);
+  }, [searchQuery, propertyType, listingType, location, priceRange, allProperties]);
 
   const handleSearch = () => {
     // Search is already live, but this button can be used to reset focus
@@ -137,7 +91,7 @@ export default function Properties() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="bg-card rounded-lg p-6 mb-12 border">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
             <div className="lg:col-span-2 flex gap-2">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -161,10 +115,24 @@ export default function Properties() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="residential">Residential</SelectItem>
-                <SelectItem value="commercial">Commercial</SelectItem>
-                <SelectItem value="land">Land</SelectItem>
-                <SelectItem value="luxury">Luxury</SelectItem>
+                {PROPERTY_TYPES.map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {PROPERTY_TYPE_LABELS[type]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={listingType} onValueChange={setListingType}>
+              <SelectTrigger data-testid="select-listing-type">
+                <SelectValue placeholder="Buy or Rent" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Sale, Rent & Lease</SelectItem>
+                {LISTING_TYPES.map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {LISTING_TYPE_LABELS[type]}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
             <Select value={location} onValueChange={setLocation}>
@@ -200,7 +168,19 @@ export default function Properties() {
           </p>
         </div>
 
-        {filteredProperties.length === 0 ? (
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} className="h-[28rem] w-full rounded-lg" />
+            ))}
+          </div>
+        ) : error ? (
+          <div className="text-center py-20">
+            <h3 className="text-2xl font-semibold mb-2">Couldn't load properties</h3>
+            <p className="text-muted-foreground mb-6">Please check your connection and try again.</p>
+            <Button onClick={() => refetch()}>Try Again</Button>
+          </div>
+        ) : filteredProperties.length === 0 ? (
           <div className="text-center py-20">
             <Search className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-2xl font-semibold mb-2">No properties found</h3>
@@ -211,6 +191,7 @@ export default function Properties() {
               onClick={() => {
                 setSearchQuery("");
                 setPropertyType("all");
+                setListingType("all");
                 setLocation("all");
                 setPriceRange("all");
               }}
@@ -222,7 +203,7 @@ export default function Properties() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredProperties.map((property) => (
-              <PropertyCard key={property.id} {...property} />
+              <PropertyCard key={property.id} property={property} />
             ))}
           </div>
         )}
