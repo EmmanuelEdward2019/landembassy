@@ -113,7 +113,7 @@ export default function Home() {
                 className="rounded-lg w-full h-[500px] object-cover shadow-xl"
               />
               <div className="absolute -bottom-6 -right-6 bg-primary text-primary-foreground p-6 rounded-lg shadow-xl">
-                <p className="text-3xl font-bold">15+</p>
+                <p className="text-3xl font-bold">5</p>
                 <p className="text-sm">Years Experience</p>
               </div>
             </div>
@@ -141,7 +141,7 @@ export default function Home() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <StatCard value="500+" label="Properties Sold" />
             <StatCard value="1000+" label="Happy Clients" />
-            <StatCard value="15+" label="Years Experience" />
+            <StatCard value="5" label="Years Experience" />
             <StatCard value="25+" label="Locations" />
           </div>
         </div>

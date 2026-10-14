@@ -10,7 +10,7 @@ export default function About() {
     <div className="min-h-screen">
       <PageHeader
         title="About Land Embassy"
-        subtitle="Building dreams, creating homes, and empowering communities since 2009"
+        subtitle="Building dreams, creating homes, and empowering communities since 2021"
         image={welcomeImage}
       />
 
@@ -137,19 +137,19 @@ export default function About() {
             />
             <div className="space-y-6">
               <Card className="p-6 hover-elevate transition-all duration-300">
-                <h3 className="font-semibold text-xl mb-2 text-primary">2009</h3>
+                <h3 className="font-semibold text-xl mb-2 text-primary">2021</h3>
                 <p className="text-muted-foreground">Founded Land Embassy Limited with a vision to democratize real estate investment</p>
               </Card>
               <Card className="p-6 hover-elevate transition-all duration-300">
-                <h3 className="font-semibold text-xl mb-2 text-primary">2012</h3>
+                <h3 className="font-semibold text-xl mb-2 text-primary">2022</h3>
                 <p className="text-muted-foreground">Completed our first major commercial development project</p>
               </Card>
               <Card className="p-6 hover-elevate transition-all duration-300">
-                <h3 className="font-semibold text-xl mb-2 text-primary">2018</h3>
+                <h3 className="font-semibold text-xl mb-2 text-primary">2024</h3>
                 <p className="text-muted-foreground">Expanded operations to multiple cities across Nigeria</p>
               </Card>
               <Card className="p-6 hover-elevate transition-all duration-300">
-                <h3 className="font-semibold text-xl mb-2 text-primary">2024</h3>
+                <h3 className="font-semibold text-xl mb-2 text-primary">2026</h3>
                 <p className="text-muted-foreground">Celebrating over 1000 satisfied clients and 500+ properties sold</p>
               </Card>
             </div>
