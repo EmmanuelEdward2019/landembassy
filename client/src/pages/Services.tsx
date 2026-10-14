@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Building2, Users, Pencil, Palette, ClipboardList, ArrowRight } from "lucide-react";
 import { Link } from "wouter";
-import headerImage from "@assets/crop for header_1761621717723.jpg";
+import headerImage from "@assets/page-header.jpg";
 
 export default function Services() {
   const services = [

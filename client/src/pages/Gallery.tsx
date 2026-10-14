@@ -1,12 +1,12 @@
 import { useState } from "react";
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
-import proHome from "@assets/Pro home 1_1761621717728.jpg";
-import plazaImage from "@assets/LARGEST PLAZA RESIZED_1761621717726.jpg";
-import cropHeader from "@assets/crop for header_1761621717723.jpg";
-import customerCare from "@assets/Customer Care_1761621717724.jpg";
-import sealedDeal from "@assets/Sealed Deal_1761621717728.jpg";
-import welcome from "@assets/welcome_1761621717729.jpg";
+import proHome from "@assets/pro-home-1.jpg";
+import plazaImage from "@assets/largest-plaza-resized.jpg";
+import cropHeader from "@assets/page-header.jpg";
+import customerCare from "@assets/customer-care.jpg";
+import sealedDeal from "@assets/sealed-deal.jpg";
+import welcome from "@assets/welcome.jpg";
 
 export default function Gallery() {
   const [selectedCategory, setSelectedCategory] = useState("all");

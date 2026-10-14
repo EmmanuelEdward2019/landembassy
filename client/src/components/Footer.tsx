@@ -2,7 +2,7 @@ import { Link } from "wouter";
 import { Facebook, Instagram, Twitter, Linkedin, Mail, Phone, MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import logoImage from "@assets/logo resized_1761621717727.png";
+import logoImage from "@assets/logo.png";
 
 export default function Footer() {
   return (

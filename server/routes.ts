@@ -3,6 +3,7 @@ import rateLimit from "express-rate-limit";
 import { storage } from "./storage.js";
 import { insertQuoteSchema, insertContactSchema } from "../shared/schema.js";
 import { requireAdminToken } from "./middleware/auth.js";
+import { notifyAdmin } from "./notify.js";
 
 // Hidden form field that real visitors never fill in; bots usually do.
 const HONEYPOT_FIELD = "website";
@@ -48,7 +49,21 @@ export function registerRoutes(app: Express) {
     }
 
     try {
-      await storage.createQuote(parsed.data);
+      const quote = await storage.createQuote(parsed.data);
+      // Awaited so serverless hosts don't freeze the function mid-send
+      await notifyAdmin({
+        subject: `New quote request from ${quote.name}`,
+        replyTo: quote.email,
+        fields: [
+          ["Name", quote.name],
+          ["Email", quote.email],
+          ["Phone", quote.phone],
+          ["Property interest", quote.propertyInterest],
+          ["Budget range", quote.budgetRange],
+          ["Preferred contact", quote.preferredContact],
+          ["Message", quote.message],
+        ],
+      });
       res.status(201).json({ ok: true });
     } catch (error) {
       next(error);
@@ -90,7 +105,17 @@ export function registerRoutes(app: Express) {
     }
 
     try {
-      await storage.createContact(parsed.data);
+      const contact = await storage.createContact(parsed.data);
+      await notifyAdmin({
+        subject: `New contact message from ${contact.name}`,
+        replyTo: contact.email,
+        fields: [
+          ["Name", contact.name],
+          ["Email", contact.email],
+          ["Phone", contact.phone],
+          ["Message", contact.message],
+        ],
+      });
       res.status(201).json({ ok: true });
     } catch (error) {
       next(error);

@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Search } from "lucide-react";
-import headerImage from "@assets/crop for header_1761621717723.jpg";
+import headerImage from "@assets/page-header.jpg";
 
 export default function Properties() {
   const [searchQuery, setSearchQuery] = useState("");

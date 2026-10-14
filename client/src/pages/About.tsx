@@ -1,9 +1,9 @@
 import PageHeader from "@/components/PageHeader";
 import { Card } from "@/components/ui/card";
 import { ShieldCheck, Award, Target, Heart, TrendingUp } from "lucide-react";
-import welcomeImage from "@assets/welcome_1761621717729.jpg";
-import customerCareImage from "@assets/Customer Care_1761621717724.jpg";
-import plazaImage from "@assets/LARGEST PLAZA RESIZED_1761621717726.jpg";
+import welcomeImage from "@assets/welcome.jpg";
+import customerCareImage from "@assets/customer-care.jpg";
+import plazaImage from "@assets/largest-plaza-resized.jpg";
 
 export default function About() {
   return (
