@@ -54,15 +54,38 @@ export const insertPropertySchema = createInsertSchema(properties).omit({
   id: true,
 });
 
-export const insertQuoteSchema = createInsertSchema(quotes).omit({
-  id: true,
-  createdAt: true,
-});
+// Public form input: bounded lengths so anonymous submissions can't bloat storage.
+const name = z.string().trim().min(1).max(120);
+const email = z.string().trim().email().max(254);
+const phone = z.string().trim().min(5).max(32);
+const message = z.string().trim().min(1).max(5000);
 
-export const insertContactSchema = createInsertSchema(contacts).omit({
-  id: true,
-  createdAt: true,
-});
+export const insertQuoteSchema = createInsertSchema(quotes)
+  .omit({
+    id: true,
+    createdAt: true,
+  })
+  .extend({
+    name,
+    email,
+    phone,
+    propertyInterest: z.string().trim().min(1).max(120),
+    budgetRange: z.string().trim().min(1).max(120),
+    message,
+    preferredContact: z.enum(["email", "whatsapp"]),
+  });
+
+export const insertContactSchema = createInsertSchema(contacts)
+  .omit({
+    id: true,
+    createdAt: true,
+  })
+  .extend({
+    name,
+    email,
+    phone: phone.nullish().or(z.literal("").transform(() => null)),
+    message,
+  });
 
 export const insertBlogPostSchema = createInsertSchema(blogPosts).omit({
   id: true,

@@ -10,6 +10,7 @@ build/
 
 # Environment files
 .env*
+!.env.example
 
 # IDE files
 .vscode/
@@ -25,3 +26,5 @@ Thumbs.db
 
 # Uploads directory
 client/public/uploads/
+# Vercel
+.vercel/
