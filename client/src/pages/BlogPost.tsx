@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar, User, ArrowLeft, Share2, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import BlogCard from "@/components/BlogCard";
+import DOMPurify from "dompurify";
 
 export default function BlogPost() {
   const [, params] = useRoute("/blog/:id");
@@ -243,7 +244,7 @@ export default function BlogPost() {
 
           <div
             className="prose prose-lg max-w-none dark:prose-invert"
-            dangerouslySetInnerHTML={{ __html: post.content }}
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }}
           />
 
           <div className="mt-12 pt-8 border-t">

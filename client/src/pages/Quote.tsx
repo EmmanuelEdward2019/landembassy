@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +17,7 @@ import headerImage from "@assets/crop for header_1761621717723.jpg";
 
 export default function Quote() {
   const { toast } = useToast();
+  const honeypotRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -45,6 +46,7 @@ export default function Quote() {
         body: JSON.stringify({
           ...formData,
           preferredContact: method,
+          website: honeypotRef.current?.value,
         }),
       });
 
@@ -94,6 +96,16 @@ export default function Quote() {
             <Card className="p-8">
               <h2 className="text-2xl font-bold mb-6">Request a Quote</h2>
               <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+                {/* Spam trap: hidden from people, often filled in by bots */}
+                <input
+                  ref={honeypotRef}
+                  type="text"
+                  name="website"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  aria-hidden="true"
+                  className="absolute left-[-9999px] h-0 w-0 opacity-0"
+                />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium mb-2">Full Name *</label>

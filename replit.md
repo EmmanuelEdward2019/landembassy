@@ -57,13 +57,13 @@ Preferred communication style: Simple, everyday language.
 
 **Development Server**: Vite middleware integration for hot module replacement during development
 
-**Storage Layer**: Abstract storage interface (`IStorage`) with in-memory implementation (`MemStorage`)
-- Designed to be swapped with database implementation
-- Currently uses Map-based storage for quotes and contacts
+**Storage Layer**: Abstract storage interface (`IStorage`)
+- `DbStorage` (Postgres via Drizzle + Neon HTTP driver) when `DATABASE_URL` is set
+- `MemStorage` (in-memory Maps) otherwise, for local development
 - UUID-based ID generation
 
 **Authentication**: Simple token-based authentication for admin routes
-- Hardcoded admin token: "LANDEMBASSY2024ADMIN"
+- Admin token read from the `ADMIN_TOKEN` environment variable (min. 24 characters; admin is disabled if unset)
 - Middleware-based protection (`requireAdminToken`)
 - Bearer token authentication scheme
 
