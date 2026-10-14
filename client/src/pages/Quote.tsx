@@ -13,7 +13,7 @@ import {
 import { Card } from "@/components/ui/card";
 import { Mail, MessageCircle, Clock, ShieldCheck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import headerImage from "@assets/crop for header_1761621717723.jpg";
+import headerImage from "@assets/page-header.jpg";
 
 export default function Quote() {
   const { toast } = useToast();

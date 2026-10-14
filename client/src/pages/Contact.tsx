@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { MapPin, Phone, Mail, MessageCircle, Clock, Globe } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import headerImage from "@assets/Customer Care_1761621717724.jpg";
+import headerImage from "@assets/customer-care.jpg";
 
 export default function Contact() {
   const { toast } = useToast();

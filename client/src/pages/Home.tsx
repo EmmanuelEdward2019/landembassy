@@ -17,9 +17,9 @@ import {
   Heart,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import heroImage from "@assets/hero image_1761621717725.jpg";
-import welcomeImage from "@assets/welcome_1761621717729.jpg";
-import customerCareImage from "@assets/Customer Care_1761621717724.jpg";
+import heroImage from "@assets/hero.jpg";
+import welcomeImage from "@assets/welcome.jpg";
+import customerCareImage from "@assets/customer-care.jpg";
 
 export default function Home() {
   // TODO: Remove mock data

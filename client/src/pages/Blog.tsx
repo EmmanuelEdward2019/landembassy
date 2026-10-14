@@ -4,7 +4,7 @@ import BlogCard from "@/components/BlogCard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
-import headerImage from "@assets/crop for header_1761621717723.jpg";
+import headerImage from "@assets/page-header.jpg";
 
 export default function Blog() {
   const [searchQuery, setSearchQuery] = useState("");

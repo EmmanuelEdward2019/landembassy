@@ -9,7 +9,7 @@ export function createApp() {
   const app = express();
 
   app.disable("x-powered-by");
-  // Behind exactly one proxy (Vercel / Replit) so rate limiting sees the real client IP
+  // Behind exactly one proxy (Vercel) so rate limiting sees the real client IP
   app.set("trust proxy", 1);
 
   app.use(
